@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Jornada do Cavalo</title>
+<style>
+  body {
+    background: #0f172a;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+  }
+
+  #board {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    margin: 20px auto;
+    width: fit-content;
+  }
+
+  .cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .white { background: #e2e8f0; color: black; }
+  .black { background: #334155; }
+
+  .knight {
+    background: #22c55e !important;
+    color: black;
+  }
+
+  button {
+    padding: 10px;
+    margin: 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h2>♞ Jornada do Cavalo (Animação)</h2>
+
+<div id="board"></div>
+
+<button onclick="start()">Iniciar</button>
+<button onclick="stop()">Parar</button>
+
+<script>
+const tour = [
+  [0,59,38,33,30,17,8,63],
+  [37,34,31,60,9,62,29,16],
+  [58,1,36,39,32,27,18,7],
+  [35,48,41,26,61,10,15,28],
+  [42,57,2,49,40,23,6,19],
+  [47,50,45,54,25,20,11,14],
+  [56,43,52,3,22,13,24,5],
+  [51,46,55,44,53,4,21,12]
+];
+
+const board = document.getElementById("board");
+let cells = [];
+let steps = [];
+let index = 0;
+let interval = null;
+
+// criar tabuleiro
+for (let i = 0; i < 8; i++) {
+  for (let j = 0; j < 8; j++) {
+    const div = document.createElement("div");
+    div.className = "cell " + ((i + j) % 2 === 0 ? "white" : "black");
+    div.innerText = "";
+    board.appendChild(div);
+    cells.push(div);
+  }
+}
+
+// converter matriz em sequência ordenada
+for (let n = 0; n < 64; n++) {
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      if (tour[i][j] === n) {
+        steps.push({i, j});
+      }
+    }
+  }
+}
+
+function draw(stepIndex) {
+  cells.forEach(c => c.classList.remove("knight"));
+
+  const {i, j} = steps[stepIndex];
+  const pos = i * 8 + j;
+
+  cells[pos].classList.add("knight");
+  cells[pos].innerText = stepIndex;
+}
+
+function start() {
+  stop();
+  index = 0;
+
+  interval = setInterval(() => {
+    draw(index);
+    index++;
+
+    if (index >= steps.length) stop();
+  }, 400); // velocidade (ms)
+}
+
+function stop() {
+  clearInterval(interval);
+}
+</script>
+
+</body>
+</html>
