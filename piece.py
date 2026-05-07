@@ -33,7 +33,7 @@ path = [None] * 64
 for row in range(8):
     for col in range(8):
         move_index = tour[row][col]
-        square = chess.square(col, 7 - row)  # converter coords
+        square = chess.square(col, 7 - row)
         path[move_index] = square
 
 # =========================
@@ -49,6 +49,38 @@ board = chess.Board(None)
 
 step = 0
 
+# =========================
+# FUNÇÃO PARA DESENHAR NÚMEROS
+# =========================
+def criar_numeros_svg():
+    textos = []
+
+    tamanho_casa = 45  # tamanho padrão do chess.svg
+
+    for i in range(step + 1):
+        sq = path[i]
+
+        col = chess.square_file(sq)
+        row = 7 - chess.square_rank(sq)
+
+        x = col * tamanho_casa + tamanho_casa / 2
+        y = row * tamanho_casa + tamanho_casa / 2 + 6
+
+        textos.append(f'''
+        <text x="{x}" y="{y}"
+              font-size="14"
+              text-anchor="middle"
+              fill="black"
+              font-weight="bold">
+              {i}
+        </text>
+        ''')
+
+    return "".join(textos)
+
+# =========================
+# ATUALIZAÇÃO DA ANIMAÇÃO
+# =========================
 def atualizar():
     global step, tk_image
 
@@ -62,7 +94,15 @@ def atualizar():
     for i in range(step + 1):
         fill[path[i]] = "#aaffaa"
 
-    svg_data = chess.svg.board(board=board, fill=fill)
+    numeros_svg = criar_numeros_svg()
+
+    svg_data = chess.svg.board(
+        board=board,
+        fill=fill
+    )
+
+    # inserir números antes do fechamento do SVG
+    svg_data = svg_data.replace("</svg>", numeros_svg + "</svg>")
 
     png_bytes = cairosvg.svg2png(bytestring=svg_data.encode("utf-8"))
     image = Image.open(io.BytesIO(png_bytes))
@@ -71,8 +111,9 @@ def atualizar():
     label.config(image=tk_image)
 
     step += 1
+
     if step < 64:
-        root.after(300, atualizar)  # intervalo (ms)
+        root.after(300, atualizar)
 
 # iniciar animação
 atualizar()
