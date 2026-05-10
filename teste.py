@@ -4,12 +4,9 @@ N = 8
 dx = [2, 1, -1, -2, -2, -1, 1, 2]
 dy = [1, 2, 2, 1, -1, -2, -2, -1]
 
-# tabuleiro
-tabuleiro = [[-1 for _ in range(N)] for _ in range(N)]
-
 
 # verifica se posição é válida
-def valido(x, y):
+def valido(x, y, tabuleiro):
     return (
         0 <= x < N and
         0 <= y < N and
@@ -18,8 +15,7 @@ def valido(x, y):
 
 
 # calcula quantidade de movimentos futuros
-# (grau do vértice)
-def grau(x, y):
+def grau(x, y, tabuleiro):
 
     contador = 0
 
@@ -28,14 +24,14 @@ def grau(x, y):
         nx = x + dx[i]
         ny = y + dy[i]
 
-        if valido(nx, ny):
+        if valido(nx, ny, tabuleiro):
             contador += 1
 
     return contador
 
 
 # gera movimentos ordenados pela heurística de Warnsdorff
-def movimentos_ordenados(x, y):
+def movimentos_ordenados(x, y, tabuleiro):
 
     movimentos = []
 
@@ -44,32 +40,30 @@ def movimentos_ordenados(x, y):
         nx = x + dx[i]
         ny = y + dy[i]
 
-        if valido(nx, ny):
+        if valido(nx, ny, tabuleiro):
 
-            g = grau(nx, ny)
+            g = grau(nx, ny, tabuleiro)
 
             movimentos.append((g, nx, ny))
 
-    # menor grau primeiro
     movimentos.sort(key=lambda t: t[0])
 
     return movimentos
 
 
 # backtracking + warnsdorff
-def resolver(x, y, passo):
+def resolver(x, y, passo, tabuleiro):
 
-    # visitou todas as casas
     if passo == N * N:
         return True
 
-    movimentos = movimentos_ordenados(x, y)
+    movimentos = movimentos_ordenados(x, y, tabuleiro)
 
     for _, nx, ny in movimentos:
 
         tabuleiro[nx][ny] = passo
 
-        if resolver(nx, ny, passo + 1):
+        if resolver(nx, ny, passo + 1, tabuleiro):
             return True
 
         # backtracking
@@ -78,20 +72,67 @@ def resolver(x, y, passo):
     return False
 
 
-# posição inicial
-inicio_x = 7
-inicio_y = 1
+# retorna a matriz do tour
+def gerar_tour(inicio_x=7, inicio_y=1):
 
-tabuleiro[inicio_x][inicio_y] = 0
+    tabuleiro = [[-1 for _ in range(N)] for _ in range(N)]
 
-if resolver(inicio_x, inicio_y, 1):
+    tabuleiro[inicio_x][inicio_y] = 0
 
-    for linha in tabuleiro:
+    if resolver(inicio_x, inicio_y, 1, tabuleiro):
+        return tabuleiro
 
-        for valor in linha:
-            print(f"{valor:2}", end=" ")
+    return None
+def resolver_simples(tabuleiro, x, y, passo):
 
-        print()
+    yield (
+        [linha[:] for linha in tabuleiro],
+        x,
+        y,
+        False
+    )
 
-else:
-    print("Sem solução")
+    if passo == N * N:
+
+        yield (
+            [linha[:] for linha in tabuleiro],
+            x,
+            y,
+            False
+        )
+
+        return True
+
+    movimentos = movimentos_ordenados(x, y, tabuleiro)
+
+    for _, nx, ny in movimentos:
+
+        if valido(nx, ny, tabuleiro):
+
+            tabuleiro[nx][ny] = passo
+
+            resultado = yield from resolver_simples(
+                tabuleiro,
+                nx,
+                ny,
+                passo + 1
+            )
+
+            if resultado:
+                return True
+
+            # backtracking visível
+            tabuleiro[nx][ny] = -1
+
+            yield (
+                [linha[:] for linha in tabuleiro],
+                nx,
+                ny,
+                True
+            )
+
+    return False
+# uso
+#tour = gerar_tour()
+
+#print(tour)

@@ -1,8 +1,10 @@
-import os
-os.add_dll_directory(r"D:\cairos\ucrt64\bin")
+from teste import resolver_simples
+from teste import gerar_tour
+#import os
+#os.add_dll_directory(r"D:\cairos\ucrt64\bin")
 
-import ctypes
-ctypes.CDLL("libcairo-2.dll")
+#import ctypes
+#ctypes.CDLL("libcairo-2.dll")
 
 import cairosvg
 import chess

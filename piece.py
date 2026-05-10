@@ -1,8 +1,8 @@
-import os
-os.add_dll_directory(r"D:\cairos\ucrt64\bin")
+#import os
+#os.add_dll_directory(r"D:\cairos\ucrt64\bin")
 
-import ctypes
-ctypes.CDLL("libcairo-2.dll")
+#import ctypes
+#ctypes.CDLL("libcairo-2.dll")
 
 import cairosvg
 import chess
